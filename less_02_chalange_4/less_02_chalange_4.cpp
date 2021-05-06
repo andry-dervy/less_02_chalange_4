@@ -54,8 +54,14 @@ struct GameSnake
     char fild[FILD_SIZE][FILD_SIZE] = { ' ' };
 };
 
+enum class eStateRunning
+{
+    SR_GAMERUNNING,
+    SR_GAMEOVER,
+};
+
 void draw_fild(char* pFild);
-void movementSnake(GameSnake* g);
+eStateRunning movementSnake(GameSnake* g);
 void mappingSnakeOnFild(GameSnake* g);
 void clean_fild(char* pFild);
 
@@ -112,9 +118,21 @@ int main()
                 break;
             }
 
-            movementSnake(&game);
+            eStateRunning sr = movementSnake(&game);
             mappingSnakeOnFild(&game);
             draw_fild(&game.fild[0][0]);
+
+            switch (sr)
+            {
+            case eStateRunning::SR_GAMERUNNING:
+                break;
+            case eStateRunning::SR_GAMEOVER:
+                std::cout << "Game over!";
+                bRunGame = false;
+                break;
+            default:
+                break;
+            }
         }
         key.code = 0;
     }
@@ -131,8 +149,9 @@ void mappingSnakeOnFild(GameSnake* g)
     }
 }
 
-void movementSnake(GameSnake *g)
+eStateRunning movementSnake(GameSnake *g)
 {
+    eStateRunning result = eStateRunning::SR_GAMERUNNING;
     bool enable_move = false;
     
     SnakeSegment seg,seg_next;
@@ -151,6 +170,10 @@ void movementSnake(GameSnake *g)
             iter->y--;
             enable_move = true;
         }
+        else if (iter->y == 0)
+        {
+            result = eStateRunning::SR_GAMEOVER;
+        }
         break;
     case DM_DOWN:
         seg.ch = iter->ch;
@@ -159,6 +182,10 @@ void movementSnake(GameSnake *g)
         {
             iter->y++;
             enable_move = true;
+        }
+        else if (iter->y == FILD_SIZE - 1)
+        {
+            result = eStateRunning::SR_GAMEOVER;
         }
         break;
     case DM_RIGHT:
@@ -169,6 +196,10 @@ void movementSnake(GameSnake *g)
             iter->x++;
             enable_move = true;
         }
+        else if (iter->x == FILD_SIZE - 1)
+        {
+            result = eStateRunning::SR_GAMEOVER;
+        }
         break;
     case DM_LEFT:
         seg.ch = iter->ch;
@@ -177,6 +208,10 @@ void movementSnake(GameSnake *g)
         {
             iter->x--;
             enable_move = true;
+        }
+        else if (iter->x == 0)
+        {
+            result = eStateRunning::SR_GAMEOVER;
         }
         break;
     }
@@ -191,6 +226,8 @@ void movementSnake(GameSnake *g)
             seg = seg_next;
         }
     }
+
+    return result;
 }
 
 void draw_fild(char *pFild)
