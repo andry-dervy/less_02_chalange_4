@@ -12,11 +12,16 @@ IDE: Visual Studio 2019
 #include <conio.h>
 #include <list>
 
+#define MIN_TIME_STEP 1
+#define MAX_TIME_STEP 1000
+
 #define ARROW_UP ((uint16_t)224) | ((uint16_t)72 << 8)
 #define ARROW_DOWN ((uint16_t)224) | ((uint16_t)80 << 8)
 #define ARROW_LEFT ((uint16_t)224) | ((uint16_t)75 << 8)
 #define ARROW_RIGHT ((uint16_t)224) | ((uint16_t)77 << 8)
 #define ESC ((uint16_t)27)
+#define PLUS ((uint16_t)43)
+#define MINUS ((uint16_t)45)
 
 struct Key
 {
@@ -45,7 +50,7 @@ struct Snake
     std::list<SnakeSegment> segments;
 };
 
-#define FILD_SIZE 10
+#define FILD_SIZE 20
 
 struct GameSnake
 {
@@ -73,6 +78,7 @@ int main()
 
     GameSnake game;
     SnakeSegment seg = {'o',0,0};
+    bool bAddSeg = false;
 
     game.snake.segments.push_back(seg);
     game.direction = DM_RIGHT;
@@ -81,43 +87,56 @@ int main()
 
     while (bRunGame)
     {
+        if (_kbhit())
+        {
+            key.first_code = _getch();
+            if (key.first_code == 224) key.second_code = _getch();
+            else key.second_code = 0;
+            key.code = ((uint16_t)key.first_code) | ((uint16_t)key.second_code << 8);
+        }
+        switch (key.code)
+        {
+        case ARROW_UP:
+            game.direction = DM_UP;
+            break;
+        case ARROW_DOWN:
+            game.direction = DM_DOWN;
+            break;
+        case ARROW_RIGHT:
+            game.direction = DM_RIGHT;
+            break;
+        case ARROW_LEFT:
+            game.direction = DM_LEFT;
+            break;
+        case ESC:
+            bRunGame = false;
+            break;
+        case PLUS:
+            if (iTimeStep > MIN_TIME_STEP) iTimeStep--;
+            break;
+        case MINUS:
+            if (iTimeStep < MAX_TIME_STEP) iTimeStep++;
+            break;
+        default:
+            if (key.code != 0)
+            {
+                seg = { (char)key.code, 0, 0 };
+                bAddSeg = true;
+            }
+            break;
+        }
+        
         if ((GetTickCount64() - time) >= iTimeStep)
         {
             time = GetTickCount64();
             system("cls");
-            if (_kbhit())
-            {
-                key.first_code = _getch();
-                if (key.first_code == 224) key.second_code = _getch();
-                else key.second_code = 0;
-                key.code = ((uint16_t)key.first_code) | ((uint16_t)key.second_code << 8);
-            }
-            switch (key.code)
-            {
-            case ARROW_UP:
-                game.direction = DM_UP;
-                break;
-            case ARROW_DOWN:
-                game.direction = DM_DOWN;
-                break;
-            case ARROW_RIGHT:
-                game.direction = DM_RIGHT;
-                break;
-            case ARROW_LEFT:
-                game.direction = DM_LEFT;
-                break;
-            case ESC:
-                bRunGame = false;
-                break;
-            default:
-                if (key.code > 0)
-                {
-                    SnakeSegment seg = { (char)key.code, 0, 0 };
-                    game.snake.segments.push_back(seg);
-                }
-                break;
-            }
 
+            if (bAddSeg == true)
+            {
+                game.snake.segments.push_back(seg);
+                bAddSeg = false;
+            }
+ 
             eStateRunning sr = movementSnake(&game);
             mappingSnakeOnFild(&game);
             draw_fild(&game.fild[0][0]);
@@ -125,6 +144,8 @@ int main()
             switch (sr)
             {
             case eStateRunning::SR_GAMERUNNING:
+                std::cout << "Time step: " << iTimeStep;
+                
                 break;
             case eStateRunning::SR_GAMEOVER:
                 std::cout << "Game over!";
