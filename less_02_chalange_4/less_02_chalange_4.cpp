@@ -1,9 +1,7 @@
 ﻿// less_02_chalange_4.cpp 
 /*
 Created by Antonenko Andry
-
 IDE: Visual Studio 2019
-
 */
 
 #include <iostream>
