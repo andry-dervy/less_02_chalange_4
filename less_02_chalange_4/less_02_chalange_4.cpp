@@ -239,12 +239,22 @@ eStateRunning movementSnake(GameSnake *g)
     
     if (enable_move)
     {
+        auto begin = g->snake.segments.begin();
         while (++iter != g->snake.segments.end())
         {
             seg_next = *iter;
-            iter->x = seg.x;
-            iter->y = seg.y;
-            seg = seg_next;
+            if (begin->x == iter->x && 
+                begin->y == iter->y)
+            {
+                result = eStateRunning::SR_GAMEOVER;
+                break;
+            }
+            else
+            {
+                iter->x = seg.x;
+                iter->y = seg.y;
+                seg = seg_next;
+            }
         }
     }
 
