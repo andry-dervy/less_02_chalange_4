@@ -50,7 +50,7 @@ struct Snake
     std::list<SnakeSegment> segments;
 };
 
-#define FILD_SIZE 20
+#define FILD_SIZE static_cast<size_t>(20)
 
 struct GameSnake
 {
@@ -263,10 +263,10 @@ eStateRunning movementSnake(GameSnake *g)
 
 void draw_fild(char *pFild)
 {
-    for (int i = 0; i < FILD_SIZE+2; i++)
+    for (size_t i = 0; i < FILD_SIZE+2; i++)
     {
         std::cout << '|';
-        for (int j = 0; j < FILD_SIZE; j++)
+        for (size_t j = 0; j < FILD_SIZE; j++)
         {
             if (i == 0 || i == (FILD_SIZE + 1))
             {
@@ -283,9 +283,9 @@ void draw_fild(char *pFild)
 
 void clean_fild(char* pFild)
 {
-    for (int i = 0; i < FILD_SIZE; i++)
+    for (size_t i = 0; i < FILD_SIZE; i++)
     {
-        for (int j = 0; j < FILD_SIZE; j++)
+        for (size_t j = 0; j < FILD_SIZE; j++)
         {
             *(pFild + i * FILD_SIZE + j) = ' ';
         }
